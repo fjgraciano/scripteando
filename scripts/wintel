@@ -1,0 +1,1 @@
+tsocks rdesktop -g 1800x1000 -u fjgraciano -p temporal 10.113.57.240

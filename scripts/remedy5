@@ -1,0 +1,3 @@
+#!/bin/bash
+tsocks rdesktop -g 1020x740 -u fjgraciano -p temporal 10.113.57.73
+#tsocks rdesktop -g 1200x700 -u fjgraciano -p temporal 10.113.57.73

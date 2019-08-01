@@ -1,0 +1,2 @@
+wpa_supplicant -B -c /home/psychex/scripts/suplicant.sh -Dwired -ienp2s0 
+dhclient -v  enp2s0 

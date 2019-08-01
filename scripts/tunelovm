@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "------------------------------------"
+echo "Conectando a OVM del servidor" $1
+echo "------------------------------------"
+
+
+ovm=$(grep -i "$@" /home/psychex/ovm.txt |grep -i "running" | awk '{print $4}')
+
+
+kill $(ps aux | grep '[7]002 -N' | awk '{print $2}')
+for i in $ovm
+do
+
+	tunel=$(grep "$i" /etc/hosts | awk '{print $1}')
+
+	tsocks ssh -f -i /home/psychex/jazztel_rsa root@$tunel -L 7002:$tunel:7002 -N
+
+	/home/psychex/firefox-sdk/bin/firefox https://localhost:7002/ovm/console 
+
+done

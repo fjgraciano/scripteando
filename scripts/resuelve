@@ -1,0 +1,5 @@
+#ª/bin/bash
+
+echo "Copiando claves en" $1
+
+tsocks ssh-copy-id esy9d5p7@$@

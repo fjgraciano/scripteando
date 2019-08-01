@@ -1,0 +1,7 @@
+echo "Creación usuario tivoli"
+echo "-----------------------"
+ 
+for SERVER in `cat listado`
+do
+    tivoli-ng cmd $SERVER "/usr/sbin/useradd -g ibmadmin -G ibmadmin -p \\\$1\\\$xyz\\\$9nl1MweBwTkFLiEb3sk0B1 -c \"ES/E/Y9D5P7/IBM/Graciano Mora, Francisco Jose\" esy9d5p7  
+done

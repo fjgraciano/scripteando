@@ -1,0 +1,11 @@
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+eapol_version=2
+ap_scan=0
+network={
+        key_mgmt=IEEE8021X
+        eap=PEAP
+        phase2="auth=MSCHAPV2"
+        identity="izamora"
+        password="Temporal01"
+}

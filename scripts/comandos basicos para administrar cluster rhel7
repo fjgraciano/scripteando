@@ -1,0 +1,86 @@
+# COMANDOS BASICOS PARA ADMINISTRAR CLUSTER RHEL7 (PACEMAKER)
+
+# El cluster es tipo activo/pasivo, esta compuesto por los nodos ctlibd06p y ctlib07p, normalmente debe estar arrancado en      
+# ctlibd06p pero funciona indistintamente en el nodo que este activo, ademas el movimiento al otro nodo 
+# del cluster se produce en menos de 30s, es muy rapido.
+# Los comandos se pueden lanzar indistintamente en cualquiera de los nodos
+
+pcs status	#comprueba el estado de todo el cluster, resources, servicios, estado de los nodos y stonith
+
+
+[root@ctlibd06p ~]# pcs status
+Cluster name: hacluster
+Stack: corosync
+Current DC: ctlibd06p (version 1.1.15-11.el7_3.5-e174ec8) - partition with quorum
+Last updated: Fri Aug  4 09:25:24 2017		Last change: Wed Aug  2 13:05:41 2017 by root via crm_resource on ctlibd06p
+
+2 nodes and 12 resources configured
+
+Online: [ ctlibd06p ctlibd07p ]
+
+Full list of resources:
+
+ scsi_shooter	(stonith:fence_scsi):	Started ctlibd06p
+ Resource Group: ha_oracle
+     vip_oraclepi	(ocf::heartbeat:IPaddr2):	Started ctlibd06p
+     vg_oracle	(ocf::heartbeat:LVM):	Started ctlibd06p
+     fs_u03oradataPINMEPR	(ocf::heartbeat:Filesystem):	Started ctlibd06p
+     fs_u02oradataPINMEPRarch	(ocf::heartbeat:Filesystem):	Started ctlibd06p
+     fs_u02oradataPINMEPRrdoa	(ocf::heartbeat:Filesystem):	Started ctlibd06p
+     fs_u02oradataPINMEPRrdob	(ocf::heartbeat:Filesystem):	Started ctlibd06p
+     fs_exportdb	(ocf::heartbeat:Filesystem):	Started ctlibd06p
+     fs_optdirectories	(ocf::heartbeat:Filesystem):	Started ctlibd06p
+     serv_oracle_listener	(ocf::heartbeat:oralsnr):	Started ctlibd06p
+     serv_oracle	(ocf::heartbeat:oracle):	Started ctlibd06p
+     serv_ha-itm	(systemd:ha-itm):	Started ctlibd06p
+
+Failed Actions:
+* serv_ha-itm_monitor_60000 on ctlibd06p 'not running' (7): call=255, status=complete, exitreason='none',
+    last-rc-change='Thu Aug  3 08:10:28 2017', queued=0ms, exec=0ms
+
+
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+
+
+
+# En este ejemplo nos informa en Failed Action: que el cluster ha tenido problemas con uno de los 
+# resources, en este caso es el ha-itm, que es el servicio que controla la monitorizacion de IBM (ITM). El 
+# mensaje es solo informativo, porque mas arriba se puede ver que esta arracando. Para limpiar esos #mensajes lo hacemos con el comando: 
+
+pcs resource cleanup ha_oracle
+
+# este comando limpia el log de los resources que estan dentro del Resources Group: ha_oracle, como podeis ver, 
+# todos los resources estan incluidos dentro de ese grupo para que a todos ellos se les aplique las mismas propiedades, 
+# el orden de estos resources es jerarquico segun aparecen listados:
+
+Resource Group: ha_oracle								# La accion que se lance sobre este grupo afecta a todos los resources, movimiento de nodos, etc...
+     vip_oraclepi		(ocf::heartbeat:IPaddr2):	Started ctlibd06p	# Virtual IP del cluster
+     vg_oracle			(ocf::heartbeat:LVM):		Started ctlibd06p	# volume group donde estan montados todos los volumenes de filesystem que pertenecen al cluster 
+     fs_u03oradataPINMEPR	(ocf::heartbeat:Filesystem):	Started ctlibd06p	# filesystem del cluster
+     fs_u02oradataPINMEPRarch	(ocf::heartbeat:Filesystem):	Started ctlibd06p	# filesystem del cluster	
+     fs_u02oradataPINMEPRrdoa	(ocf::heartbeat:Filesystem):	Started ctlibd06p	# filesystem del cluster
+     fs_u02oradataPINMEPRrdob	(ocf::heartbeat:Filesystem):	Started ctlibd06p	# filesystem del cluster
+     fs_exportdb		(ocf::heartbeat:Filesystem):	Started ctlibd06p	# filesystem del cluster
+     fs_optdirectories		(ocf::heartbeat:Filesystem):	Started ctlibd06p	# filesystem del cluster
+     serv_oracle_listener	(ocf::heartbeat:oralsnr):	Started ctlibd06p	# listener de la base de datos
+     serv_oracle		(ocf::heartbeat:oracle):	Started ctlibd06p	# base de datos
+     serv_ha-itm		(systemd:ha-itm):		Started ctlibd06p	# IBM ITM
+
+# Las acciones referentes a resources hay que realizarlas siempre sobre el Resource Group: ha_oracle, no sobre un resource por separado, 
+# por ejemplo, movimiento de los recursos al otro nodo:
+
+pcs resource move ha_oracle ctlibd07p
+
+# con este comando movemos todos los resources a el nodo ctlibd07p
+
+# Parar o arrancar los servicios del cluster en uno de los nodos o --all en ambos nodos.
+
+pcs cluster stop/start [--all] [node] [...] 
+
+# Forzar parada en el nodo en el que se ejecuta, si no para de ninguna de las maneras
+
+pcs cluster kill
+

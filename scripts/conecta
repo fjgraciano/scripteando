@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "Conectando a" $1
+#read -r server
+
+tsocks ssh esy9d5p7@$@
